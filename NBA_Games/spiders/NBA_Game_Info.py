@@ -19,7 +19,7 @@ class NBAGameInfo(scrapy.Spider):
 
 	base_url = "https://www.basketball-reference.com"
 
-	jogos_url = [line.rstrip('\n') for line in open('links_jogos.txt')]
+	jogos_url = [line.rstrip('\n') for line in open('links_jogos2018_08_10_22-46-26.txt')]
 
 	#jogos_url = [jogos_url[2], jogos_url[4]]
 

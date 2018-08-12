@@ -4,6 +4,8 @@ import re
 from scrapy.selector import Selector
 from scrapy.http import HtmlResponse
 from time import gmtime, strftime
+import time
+import datetime
 import pandas as pd
 
 class NBALinksGames(scrapy.Spider):
@@ -12,7 +14,7 @@ class NBALinksGames(scrapy.Spider):
 	handle_httpstatus_list = [500]
 
 	anos = [ str(i) for i in range(2018, 2015, -1)]
-	meses = ["october", "november", "december", "january", "februray", "march", "april", "may", "june"]
+	meses = ["october", "november", "december", "january", "february", "march", "april", "may", "june"]
 
 	#start_urls = [
 	#   "https://www.basketball-reference.com/leagues/NBA_2018_games-october.html"
@@ -20,7 +22,7 @@ class NBALinksGames(scrapy.Spider):
 
 	base_url = "https://www.basketball-reference.com/leagues/NBA_"
 
-	result_file = open('links_jogos.txt', 'a')
+	result_file = open('links_jogos ' + datetime.datetime.fromtimestamp(time.time()).strftime('%Y_%m_%d %H-%M-%S') + '.txt', 'a')
 
 	def start_requests(self):	
 		for ano in self.anos:
