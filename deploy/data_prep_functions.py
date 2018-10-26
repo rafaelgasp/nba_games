@@ -359,39 +359,49 @@ def prepara_base(base):
     
     return(all_games)
 
-def cria_features(all_games, dist_matrix_path="../old_files/dist_matrix_km.csv"):
+def cria_features(new_games, all_games = None, dist_matrix_path="../old_files/dist_matrix_km.csv"):
     """
         
     """
+    
+    if(all_games is None):
+        all_games = new_games.copy()
+    
     df_dist = pd.read_csv(dist_matrix_path, index_col=0)
     
-    all_games["DISTANCE_KM_home"] = [get_dist_last_game(all_games, x.DATE, df_dist, x.team_home, x.team_away, is_home=True) 
-                                    for _, x in all_games.iterrows()]
-    all_games["DISTANCE_KM_away"] = [get_dist_last_game(all_games, x.DATE, df_dist, x.team_home, x.team_away, is_home=False) 
-                                    for _, x in all_games.iterrows()]
+    new_games["DISTANCE_KM_home"] = [get_dist_last_game(all_games, x.DATE, df_dist, x.team_home, x.team_away, is_home=True) 
+                                    for _, x in new_games.iterrows()]
+    new_games["DISTANCE_KM_away"] = [get_dist_last_game(all_games, x.DATE, df_dist, x.team_home, x.team_away, is_home=False) 
+                                    for _, x in new_games.iterrows()]
     
-    all_games["DAYS_FROM_LAST_GAME_home"] = [get_days_from_last_game(all_games, x.DATE, x.team_home) 
-                                            for _, x in all_games.iterrows()]
-    all_games["DAYS_FROM_LAST_GAME_away"] = [get_days_from_last_game(all_games, x.DATE, x.team_away) 
-                                            for _, x in all_games.iterrows()]
+    new_games["DAYS_FROM_LAST_GAME_home"] = [get_days_from_last_game(all_games, x.DATE, x.team_home) 
+                                            for _, x in new_games.iterrows()]
+    new_games["DAYS_FROM_LAST_GAME_away"] = [get_days_from_last_game(all_games, x.DATE, x.team_away) 
+                                            for _, x in new_games.iterrows()]
+    
+    return(new_games)
     
     
-def gera_last_N_games(all_games, N = [5]):
+def gera_last_N_games(new_games, all_games = None, N = [5]):
     """
         Gera as variáveis em relação ao desempenho médio nos últimos N jogos nas visões LAST_GAMES, AS_HOME, AS_AWAY e RIVALS.
         
         Parâmetros:
             all_games: DataFrame com as informações do desempenho dos dois times por jogo. Tipicamente após aplicar as funções 'prepara_base()' e 'cria_features()'
+            new_games: DataFrame com os novos jogos a serem computados os desempenhos passados. Deve conter as colunas 'team_home', 'team_away', 'DATE' e 'GAME'
                     N: Lista com os tamanhos de janelas dos últimos jogos a serem observados
     """
     
     gc.enable()
     resp = []
     
+    if(all_games is None):
+        all_games = new_games.copy()
+    
     home_columns = [x for x in all_games.columns if x.endswith("_home") and x not in ['GAME_ID_home', 'TEAM_CITY_home', 'GAME_DATE_home', 'GAME_PLACE_home', 'TEAM_NICKNAME_home']]
     away_columns = [x for x in all_games.columns if x.endswith("_away") and x not in ['TEAM_CITY_away', 'TEAM_NICKNAME_away']]
 
-    for index, row in all_games.reset_index().iterrows():
+    for index, row in new_games.reset_index().iterrows():
         game_line_n = []
         for n_games in N:
             # Home team
