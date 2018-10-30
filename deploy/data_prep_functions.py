@@ -361,7 +361,12 @@ def prepara_base(base):
 
 def cria_features(new_games, all_games = None, dist_matrix_path="../old_files/dist_matrix_km.csv"):
     """
+        Cria as features relacionadas à distância e fadiga, utilizando a localização e a data dos jogos ocorridos
         
+        Parâmetros:
+            new_games: DataFrame com os jogos a que se deseja preencher com as variáveis
+            all_games: DataFrame com os jogos históricos ocorridos. Caso, None, assume-se que a base 'new_games' possua o histórico também.
+     dist_matrix_path: Caminho do arquivo com tabela da matriz de distâncias entre os times
     """
     
     if(all_games is None):

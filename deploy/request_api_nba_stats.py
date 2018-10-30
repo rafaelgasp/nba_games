@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import os
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 import requests
 import pickle
@@ -40,6 +40,14 @@ def get_df_nba_json(resp_json, date_place = False, rs=0):
 
         df_resp["GAME"] = np.repeat(teams[0] + " @ " + teams[1] + " " + game_date, len(df_resp))
     
+    if "TEAM_NAME" in df_resp.columns:
+        df_resp = df_resp.sort_values("TEAM_NAME")
+    else:
+        if "TEAM_NICKNAME" in df_resp.columns:
+            df_resp = df_resp.sort_values("TEAM_NICKNAME")
+        else:
+            df_resp = df_resp.sort_values("TEAM_ABBREVIATION")
+        
     return(df_resp)
 
 def junta_df_tipos(df_tipos, cols_drop = ['GAME_ID', 'TEAM_ID', 'TEAM_ABBREVIATION', 'TEAM_CITY', 
@@ -64,7 +72,7 @@ def junta_df_tipos(df_tipos, cols_drop = ['GAME_ID', 'TEAM_ID', 'TEAM_ABBREVIATI
 
 def get_list_gameids(max_date = datetime.today() - timedelta(1), year = '2018', start_at=1):
     game_ids = []
-    for i in range(start_at, 1231):
+    for i in range(start_at, 1230 + 1):
         gameid = "002" + year[-2:] + "0" + ('{0:0>4}'.format(i))
         
         game_date = get_date_place(gameid, year = "2018")[0]
@@ -159,3 +167,4 @@ def get_nba_stats_data(game_ids, lista_sites = ["traditional", "advanced", "scor
             time.sleep(3)
     
     return(df_full, df_full_jogo, erros)
+
