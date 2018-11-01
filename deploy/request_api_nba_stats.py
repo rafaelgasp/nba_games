@@ -15,15 +15,19 @@ def get_date_place(game_id, year = "2017"):
     #0021700784
     try:
         resp = requests.get(url="https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/" + str(year) + "/scores/gamedetail/"+ str(game_id) +"_gamedetail.json",
-                            headers=NBA_STATS_HEADERS)
+                            headers=headers)
         data = resp.json()["g"]["gdte"]
         place = resp.json()["g"]["an"]
+        team_away = resp.json()["g"]["gcode"][9:-3]
+        team_home = resp.json()["g"]["gcode"][-3:]
     except Exception as e:
         print(e)
         data = np.nan
         place = np.nan
+        team_away = np.nan
+        team_home = np.nan
     
-    return(data, place)
+    return(data, place, team_away, team_home)
 
 def get_df_nba_json(resp_json, date_place = False, rs=0):
     dict_resp = resp_json['resultSets'][rs]
@@ -31,14 +35,12 @@ def get_df_nba_json(resp_json, date_place = False, rs=0):
     df_resp.columns = dict_resp["headers"]
     
     if(date_place):
-        game_date, game_place = get_date_place(df_resp.GAME_ID.iloc[0])
+        game_date, game_place, team_away, team_home = get_date_place(df_resp.GAME_ID.iloc[0])
 
         df_resp["GAME_DATE"] = np.repeat(game_date, len(df_resp))
         df_resp["GAME_PLACE"] = np.repeat(game_place, len(df_resp))
 
-        teams = df_resp.TEAM_ABBREVIATION.unique()
-
-        df_resp["GAME"] = np.repeat(teams[0] + " @ " + teams[1] + " " + game_date, len(df_resp))
+        df_resp["GAME"] = np.repeat(team_away + " @ " + team_home + " " + game_date, len(df_resp))
     
     if "TEAM_NAME" in df_resp.columns:
         df_resp = df_resp.sort_values("TEAM_NAME")
@@ -109,7 +111,7 @@ def get_nba_stats_data(game_ids, lista_sites = ["traditional", "advanced", "scor
         df_tipos_jogo = []
 
         try:
-            game_date, game_place = get_date_place(game_id, year)
+            game_date, game_place, team_away, team_home = get_date_place(game_id, year)
     
             for site in lista_sites:
                 if(site == "hustle"):
@@ -150,8 +152,7 @@ def get_nba_stats_data(game_ids, lista_sites = ["traditional", "advanced", "scor
             df_resp_jogo["GAME_DATE"] = np.repeat(game_date, len(df_resp_jogo))
             df_resp_jogo["GAME_PLACE"] = np.repeat(game_place, len(df_resp_jogo))
 
-            teams = df_resp.TEAM_ABBREVIATION.unique()
-            game_str = teams[0] + " @ " + teams[1] + " " + game_date
+            game_str = team_away + " @ " + team_home + " " + game_date
 
             df_resp["GAME"] = np.repeat(game_str, len(df_resp))
             df_resp_jogo["GAME"] = np.repeat(game_str, len(df_resp_jogo))
