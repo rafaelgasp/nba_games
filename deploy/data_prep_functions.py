@@ -514,8 +514,7 @@ def gera_last_N_games(new_games, all_games = None, N = [5]):
     
     return(pd.concat(resp2))
 
-def variaveis_delta(df_resp, N = [5], keep_features = ["team_home", "team_away", "DATE", 'fl_home_win', 
-                                                       'team_home_game_num', 'team_away_game_num', 
+def variaveis_delta(df_resp, N = [5], keep_features = ["team_home", "team_away", "DATE",  
                                                      'DISTANCE_KM_home', 'DISTANCE_KM_away', 'DAYS_FROM_LAST_GAME_home',
                                                        'DAYS_FROM_LAST_GAME_away']):
     """
@@ -535,6 +534,9 @@ def variaveis_delta(df_resp, N = [5], keep_features = ["team_home", "team_away",
         if "_home_L5" in var:
             columns_subtract.append(var.replace("_home_L5_HOME", "").replace("_opponent_home_L5", "").replace("_home_L5", ""))
     columns_subtract = list(set(columns_subtract))
+    
+    if('fl_home_win' in df_resp.columns):
+        keep_features += ['fl_home_win', 'team_home_game_num', 'team_away_game_num']
 
     filtrada = df_resp[keep_features].copy()
     

@@ -5,6 +5,7 @@ import time
 from datetime import datetime, timedelta
 import json
 import requests
+from requests import RequestException
 import pickle
 
 NBA_STATS_HEADERS = {
@@ -15,7 +16,7 @@ def get_date_place(game_id, year = "2017"):
     #0021700784
     try:
         resp = requests.get(url="https://data.nba.com/data/10s/v2015/json/mobile_teams/nba/" + str(year) + "/scores/gamedetail/"+ str(game_id) +"_gamedetail.json",
-                            headers=headers)
+                            headers=NBA_STATS_HEADERS)
         data = resp.json()["g"]["gdte"]
         place = resp.json()["g"]["an"]
         team_away = resp.json()["g"]["gcode"][9:-3]
@@ -32,6 +33,8 @@ def get_date_place(game_id, year = "2017"):
 def get_df_nba_json(resp_json, date_place = False, rs=0):
     dict_resp = resp_json['resultSets'][rs]
     df_resp = pd.DataFrame(dict_resp["rowSet"])
+    if(df_resp.empty):
+        df_resp = pd.DataFrame(pd.np.empty((0,len(dict_resp["headers"]))))
     df_resp.columns = dict_resp["headers"]
     
     if(date_place):
@@ -85,7 +88,31 @@ def get_list_gameids(max_date = datetime.today() - timedelta(1), year = '2018', 
         game_ids.append(gameid)
     return(game_ids)
 
-def get_nba_stats_data(game_ids, lista_sites = ["traditional", "advanced", "scoring", 
+def get_game_infos_dates(games_ids):
+    year = "20" + games_ids[0][3:5]
+    
+    resp = {
+        "GAME": [],
+        "DATE": [],
+        "PLACE": [],
+        "team_home": [],
+        "team_away": [],
+    }
+    
+    for game_id in games_ids:
+        game_date, game_place, team_away, team_home = get_date_place(game_id, year)
+        resp["GAME"].append(team_away + " @ " + team_home + " " + game_date)
+        resp["DATE"].append(game_date)
+        resp["PLACE"].append(game_place)
+        resp["team_away"].append(team_away)
+        resp["team_home"].append(team_home)
+        
+    resp = pd.DataFrame(resp)
+    resp.DATE = pd.to_datetime(resp.DATE)
+    return(resp)
+        
+
+def get_nba_stats_data(games_ids, lista_sites = ["traditional", "advanced", "scoring", 
                                                 "misc", "usage", "fourfactors", "playertrack", 
                                                 "hustle", "defensive"]):    
     params = {
@@ -105,7 +132,7 @@ def get_nba_stats_data(game_ids, lista_sites = ["traditional", "advanced", "scor
     
     year = "20" + games_ids[0][3:5]
 
-    for game_id in game_ids:
+    for game_id in games_ids:
 
         df_tipos = []
         df_tipos_jogo = []
@@ -162,10 +189,12 @@ def get_nba_stats_data(game_ids, lista_sites = ["traditional", "advanced", "scor
 
             #pickle.dump(df_full, open("df_full.p", "wb"))
             #pickle.dump(df_full_jogo, open("df_full_jogo.p", "wb"))
-        except Exception as e:
-            erros.append(game_id)
+        except RequestException as e:
             print(e)
-            time.sleep(3)
+        #except Exception as e:
+        #    erros.append(game_id)
+        #    print(e)
+            #time.sleep(3)
     
     return(df_full, df_full_jogo, erros)
 
