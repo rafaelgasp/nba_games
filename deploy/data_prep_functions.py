@@ -71,7 +71,7 @@ def get_avg_last_games(last_games, team_name, home_columns, away_columns,
         last_games_home.columns = [x.replace("_home","_opponent") for x in last_games_home.columns]
         last_games_away.columns = [x.replace("_away","_opponent") for x in last_games_away.columns]
     
-    if(n == 10000 or n < len(last_games_home) + len(last_games_away)):
+    if(n == 10000 or n <= (len(last_games_home) + len(last_games_away))):
         n = len(last_games_home) + len(last_games_away)        
     
     if(len(last_games_home) == 0):
@@ -211,7 +211,7 @@ def cria_variaveis_sumarizacao(last_games, team_name, n = 5, data_ref = None, ve
     
     # Visão geral
     resp["N_WINS_TOTAL"] = [resp["N_WINS_AWAY"][0] + resp["N_WINS_HOME"][0]]
-    resp["WIN_PCT"] = [resp["N_WINS_TOTAL"][0]/n]
+    resp["WIN_PCT"] = [resp["N_WINS_TOTAL"][0]/(resp["N_GAMES_AWAY"][0] + resp["N_GAMES_HOME"][0])]
     
     if verbose:
         print("Win_PCT", resp["WIN_PCT"][0], resp["N_WINS_AWAY"][0], resp["N_WINS_HOME"][0])

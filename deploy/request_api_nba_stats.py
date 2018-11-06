@@ -101,6 +101,7 @@ def get_game_infos_dates(games_ids):
     
     for game_id in games_ids:
         game_date, game_place, team_away, team_home = get_date_place(game_id, year)
+        print(team_away + " @ " + team_home + " " + game_date + "              ", end="\r")
         resp["GAME"].append(team_away + " @ " + team_home + " " + game_date)
         resp["DATE"].append(game_date)
         resp["PLACE"].append(game_place)
