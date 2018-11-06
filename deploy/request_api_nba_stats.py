@@ -82,7 +82,7 @@ def get_list_gameids(max_date = datetime.today() - timedelta(1), year = '2018', 
         
         game_date = get_date_place(gameid, year = "2018")[0]
         print((gameid, game_date), end="\r")
-        if(datetime.strptime(game_date, '%Y-%m-%d') > max_date):
+        if(datetime.strptime(game_date, '%Y-%m-%d') >= max_date):
             break
         
         game_ids.append(gameid)
