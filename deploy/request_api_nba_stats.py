@@ -199,3 +199,28 @@ def get_nba_stats_data(games_ids, lista_sites = ["traditional", "advanced", "sco
     
     return(df_full, df_full_jogo, erros)
 
+# ODDS PORTAL
+def trata_df_odds(table_html):
+    df_odds = pd.read_html(table_html)
+    df_odds = pd.concat(df_odds)
+    df_odds[0] = df_odds[0].shift(1)
+    
+    df_odds.columns = ["date", "game", "result", "odds_home", "odds_away", "B's"]
+    df_odds.dropna(subset=(["odds_home", "B's"]), inplace=True)
+    
+    df_odds["date"] = [x if len(x) > 5 else np.nan for x in df_odds["date"]]
+    df_odds["date"].fillna(method='ffill', inplace=True)
+    df_odds["data"] = [datetime.strptime(x.split(" - ")[0], '%d %b %Y') for x in df_odds["date"]]
+    
+    return(df_odds)
+
+def parse_home_team(game_str):
+    for key in de_para_siglas.keys():
+        game_str = game_str.replace(key, de_para_siglas[key])
+    
+    game_str = game_str.replace("-", "@")
+    spl =  game_str.split(" @ ")
+    return(game_str, spl[0], spl[1])
+
+def get_odds():
+    "https://www.oddsportal.com/basketball/usa/nba/"
