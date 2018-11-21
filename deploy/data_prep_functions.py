@@ -343,7 +343,7 @@ def prepara_base(base):
     all_games = home_games.join(away_games, how="inner", lsuffix="_home", rsuffix="_away")
     all_games.drop(["GAME_ID_away", "GAME_DATE_away", "GAME_PLACE_away",
                 "MIN_home", "MIN_away", 'PTS_hustle_home', 'PTS_hustle_away',
-                "fl_home_away", "fl_home_home"], axis=1, inplace=True)
+                "fl_home_away", "fl_home_home"], axis=1, inplace=True, errors="ignore")
     
     all_games["DATE"] = [datetime.strptime(str(x), '%Y-%m-%d') for x in all_games.GAME_DATE_home]
     all_games["SEASON"] = [get_season(x) for x in all_games.DATE]
